@@ -1,0 +1,39 @@
+<canvas id="plant_channel_{{ factor.channel.id }}"></canvas>
+<script>
+var ctx = document.getElementById("plant_channel_{{ factor.channel.id }}");
+var deviceLineChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: [{% for t in factor.channel.get_labels_for_display() %}'{{ t }}',{% endfor %}],
+        datasets: [
+        {
+            data: {{ factor.channel.get_datum_for_display() }},
+            fill: false,
+            borderColor: '#18bc9c',
+            borderWidth: 2,
+            pointBorderColor: "#18bc9c",
+            pointBackgroundColor: "#fff",
+            pointBorderWidth: 1,
+            pointHoverRadius: 3,
+            pointHoverBackgroundColor: "#fff",
+            pointHoverBorderColor: "#18bc9c",
+            pointHoverBorderWidth: 2,
+            pointRadius: 0,
+            pointHitRadius: 10,
+        },
+        ]
+    },
+    options: {
+        legend: {
+            display: false,
+        },
+        scales: {
+            yAxes: [{
+                ticks: {
+                    beginAtZero:true,
+                }
+            }]
+        }
+    },
+});
+</script>

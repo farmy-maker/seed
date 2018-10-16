@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>{% block sub_title %}{% endblock %} - Cooking School</title>
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="{{ url_for('static', filename='js/jquery-3.3.1.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/Chart.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/socket.io.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+    {% block style %}
+    {% endblock %}
+    {% block script %}
+    {% endblock %}
+
+  </head>
+  <body>
+    {% block nav %}
+    {% include 'common/nav.html' %}
+    {% endblock %}
+    {% block content %}
+    {% endblock %}
+    {% block footer %}
+    {% endblock %}
+  </body>
+</html>

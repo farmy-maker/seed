@@ -1,0 +1,116 @@
+{% extends 'common/base.html' %}
+{% block sub_title %}
+Plant
+{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="row ">
+    <h1 class="col">{{ plant.name }}</h1>
+  </div>
+  <hr>
+
+  <div class="row">
+    <div class="col-sm-4 col-md-4">
+      <img class="img-fluid" src="{{ url_for('static', filename=plant.display_image_url) }}"/>
+    </div>
+    <div class="col-sm-4 col-md-4">
+      <h3>植物情報</h3>
+      <hr>
+      {% include 'parts/plant_info_parts.html' %}
+    </div>
+    <div class="col-sm-4 col-md-4">
+      <h3>最新情報</h3>
+      <hr>
+      {% for factor in plant.factors %}
+        <h4>{{ factor.display_name }}</h4>
+        <p class="h1">{% if factor.latest_value %}{{ factor.latest_value.value }}<p class="small h3">({{ factor.latest_value.recorded_passed }})</p>{% else %}-{% endif %}</p>
+      {% endfor %}
+    </div>
+  </div>
+  <div class="row my-3">
+    <h2 class=>環境グラフ</h2>
+  </div>
+  <div class="row">
+  <div class="card-columns">
+    {% for factor in plant.factors %}
+      <div class="card bg-light">
+        <div class="card-header">
+          <h5>{{ factor.display_name }}</h5>
+        </div>
+        <div class="card-body">
+          {% include 'parts/channel_chart_part.html' %}
+          <a href="#" class="btn btn-success btn-sm" role="button">詳細</a>
+          <button type="button" class="btn btn-dark btn-sm float-right" data-toggle="modal" data-target="#edit_plant_factor_trigger_modal_{{ factor.id }}"><b>+</b> Trigger</button>
+          <div class="modal fade" id="edit_plant_factor_trigger_modal_{{ factor.id }}" tabindex="-1" role="dialog">
+            <div class="modal-dialog modal-lg">
+              <div class="modal-content">
+                <form class="form-horizontal" action="{{ url_for('create_trigger', factor_id=factor.id) }}" method="post">
+                  <div class="modal-header">
+                    <h5 class="modal-title">Triggerを設定</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                  <div class="modal-body">
+                     {% include 'parts/plant_factor_trigger_fieldset.html' %}
+                  </div>
+                  <div class="modal-footer">
+                    <button class="btn btn-success" {% if not trigger_form.controller.choices %}disabled{% endif %}>追加</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">キャンセル</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+  </div>
+  <hr>
+  {% if plant.triggers %}
+  <h4>Trigger 一覧</h4>
+  <table class="table table-striped table-hover text-center">
+    <tbody>
+    {% for trigger in plant.triggers %}
+      <tr>
+        <td class="align-middle">IF</td>
+        <td class="align-middle">{{ trigger.factor.display_name }}</td>
+        <td class="align-middle">{{ trigger.operator }}</td>
+        <td class="align-middle">{{ trigger.threshold }}</td>
+        <td class="align-middle">THEN</td>
+        <td class="align-middle">{{ trigger.action_type }}</td>
+        <td class="align-middle">{{ trigger.controller.control_type }}</td>
+        <td class="align-middle">{% if trigger.is_triggered %}<span class="text-danger"><i class="glyphicon glyphicon-ok-sign"></i> <strong>Triggerd!</strong></span>{% endif %}</td>
+        <td class="align-middle">
+        <form class="form-horizontal" action="{{ url_for('delete_trigger', trigger_id=trigger.id) }}" method="post">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+          <button type="submit" class="btn btn-danger btn-sm">削除</button>
+        </form>
+        </td>
+      </tr>
+    {% else %}
+    <tr><td class="text-muted">Trigger はありません</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+  <hr>
+  <div class="row my-3">
+    <h2 class="pull-left">写真</h2>
+  </div>
+
+  <div class="row">
+  {% for snapshot in plant.snapshots[:20] %}
+    <div class="col-sm-3 col-md-3">
+      <figure class="figure">
+        <img src="{{ url_for('static', filename=snapshot.image_path) }}" class="figure-img img-fluid img-thumbnail rounded" alt="{{ snapshot.created_at }}">
+        <figcaption class="figure-caption text-center">{{ snapshot.created_at }}</figcaption>
+      </figure>
+    </div>
+  {% else %}
+    <p class="text-center text-muted">写真はありません</p>
+  {% endfor %}
+  </div>
+</div>
+{% endblock %}
