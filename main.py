@@ -1,5 +1,5 @@
 # utf-8
-from flask import Flask, render_template, redirect, request
+from flask import Flask, render_template, redirect, request, send_file, url_for
 from models.plant import Plant, PlantFactorTrigger, PlantFactor
 from models.device import DeviceController
 from models.base import session
@@ -10,6 +10,8 @@ from apscheduler.scheduler import Scheduler
 from config import FETCH_DATA_INTERVAL, FETCH_IMAGE_INTERVAL, TRIGGER_INTERVAL, MODE
 from data import socketio, fetch_and_save_data, fetch_and_save_image, trigger_led, trigger_pump
 from device import device
+import qrcode
+from io import BytesIO
 
 
 app = Flask(__name__)
@@ -79,7 +81,7 @@ def delete_trigger(trigger_id):
 
 
 @csrf.exempt
-@app.route('/control', methods=['POST', 'GET'])
+@app.route('/control/', methods=['POST', 'GET'])
 def control():
     if request.method == 'POST':
         controller_type = request.json['controller_type']
@@ -91,6 +93,15 @@ def control():
         return "OK"
     else:
         return render_template('control.html')
+
+
+@app.route('/qrcode/')
+def qr():
+    f = BytesIO()
+    img = qrcode.make(request.url_root + 'control/')
+    img.save(f, format='png')
+    f.seek(0)
+    return send_file(f, mimetype='image/png')
 
 
 if __name__ == '__main__':
