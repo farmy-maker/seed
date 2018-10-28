@@ -1,3 +1,4 @@
+# coding: utf-8
 from enum import Enum
 
 
@@ -21,11 +22,11 @@ class EnumBase(Enum):
 
 
 FACTOR_NAME = dict(
-    temperature="温度",
-    humidity="湿度",
-    light="照度",
-    soil_moisture="水分",
-    soil_temperature="土壌温度"
+    temperature=u"温度",
+    humidity=u"湿度",
+    light=u"照度",
+    soil_moisture=u"水分",
+    soil_temperature=u"土壌温度"
 )
 
 

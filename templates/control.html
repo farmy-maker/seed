@@ -1,0 +1,33 @@
+{% extends 'common/base.html' %}
+{% block sub_title %}
+Plant
+{% endblock %}
+{% block content %}
+<meta name="csrf-token" content="{{ csrf_token() }}">
+<div class="container">
+  <div class="row">
+    <div class="col">
+      <div class="card bg-light">
+        <div class="card-header">
+        <h3 class="text-center mb-3">LED</h3>
+        </div>
+        <div class="card-body">
+            <button data-type="led" data-action-type="turn_on" type="button" class="control-btn btn btn-success btn-lg btn-block">TURN ON</button>
+            <button data-type="led" data-action-type="turn_off" type="button" class="control-btn btn btn-dark btn-lg btn-block">TURN OFF</button>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card bg-light">
+        <div class="card-header">
+        <h3 class="text-center mb-3">PUMP</h3>
+        </div>
+        <div class="card-body">
+            <button data-type="pump" data-action-type="turn_on" type="button" class="control-btn btn btn-success btn-lg btn-block">TURN ON</button>
+            <button data-type="pump" data-action-type="turn_off" type="button" class="control-btn btn btn-dark btn-lg btn-block">TURN OFF</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

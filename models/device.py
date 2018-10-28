@@ -1,9 +1,11 @@
+# coding: utf-8
 from sqlalchemy import Column, ForeignKey, Integer, Float, String, Text, DateTime, Enum
 from sqlalchemy.orm import relationship
 from .base import Base, engine
 from .enums import PlantControllerType
 from datetime import datetime, timedelta
 from itertools import groupby
+from config import CHART_INTERVAL, CHART_BEFORE
 
 
 class Device(Base):
@@ -34,7 +36,7 @@ class DeviceController(Base):
 
     id = Column(Integer, primary_key=True)
     device_id = Column(Integer, ForeignKey('devices.id'))
-    control_type = Column(Enum(PlantControllerType))
+    controller_type = Column(Enum(PlantControllerType))
 
     device = relationship("Device", back_populates="controllers")
     triggers = relationship("PlantFactorTrigger", order_by='PlantFactorTrigger.id', back_populates="controller")
@@ -66,16 +68,16 @@ class DeviceChannel(Base):
         recent_datum = self.get_datum_before_minutes(minutes)
         return ChannelData.get_avg_datum_group_by_minute(recent_datum, base=base)
 
-    def get_avg_datum_in_one_day(self):
-        return self.get_avg_datum_before_minutes(60*24, base=30)
+    def get_avg_datum_in(self):
+        return self.get_avg_datum_before_minutes(CHART_BEFORE, base=CHART_INTERVAL)
 
     def get_labels_for_display(self):
-        datum = self.get_avg_datum_in_one_day()
-        return [d.strftime("%d/%H:%M") for d in datum.keys()]
+        datum = self.get_avg_datum_in()
+        return [d[0].strftime("%d/%H:%M") for d in datum]
 
     def get_datum_for_display(self):
-        datum = self.get_avg_datum_in_one_day()
-        return list(datum.values())
+        datum = self.get_avg_datum_in()
+        return [d[1] for d in datum]
 
     @property
     def latest_value(self):
@@ -94,7 +96,7 @@ class ChannelData(Base):
     id = Column(Integer, primary_key=True)
     channel_id = Column(Integer, ForeignKey('device_channels.id'))
     value = Column(Float)
-    recorded_at = Column(DateTime, index=True, default=datetime.utcnow)
+    recorded_at = Column(DateTime, index=True, default=datetime.now)
 
     channel = relationship("DeviceChannel", back_populates="datum")
 
@@ -121,6 +123,7 @@ class ChannelData(Base):
         def mean(datum_iter):
             numbers = [d.value for d in datum_iter]
             return round(float(sum(numbers)) / max(len(numbers), 1), 2)
-        return {dt: mean(datum_iter) for dt, datum_iter in grouped_datum}
+        return [(dt, mean(datum_iter)) for dt, datum_iter in grouped_datum]
+
 
 Base.metadata.create_all(engine)

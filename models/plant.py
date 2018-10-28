@@ -60,13 +60,14 @@ class Plant(Base):
     def soil_temperature_factor(self):
         return self.factors.filter(PlantFactor.factor_type == PlantGrowthFactor.SOIL_TEMPERATURE).one()
 
+    @property
     def soil_moisture_factor(self):
         return self.factors.filter(PlantFactor.factor_type == PlantGrowthFactor.SOIL_MOISTURE).one()
 
     @property
     def triggered_actions(self):
         triggers = [t for t in self.triggers.all() if t.is_triggered]
-        return [{'action_type': t.action_type.value, 'controller': t.controller.control_type.value} for t in triggers]
+        return [{'action_type': t.action_type.value, 'controller': t.controller.controller_type.value} for t in triggers]
 
 
 class PlantFactor(Base):
@@ -77,8 +78,8 @@ class PlantFactor(Base):
     plant_id = Column(Integer, ForeignKey('plants.id'))
     factor_type = Column(Enum(PlantGrowthFactor))
     channel_id = Column(Integer, ForeignKey('device_channels.id'))
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.now)
+    updated_at = Column(DateTime, default=datetime.now)
 
     plant = relationship("Plant", uselist=False, back_populates="factors")
     channel = relationship("DeviceChannel", back_populates="plant_factor")
@@ -104,22 +105,28 @@ class PlantFactorTrigger(Base):
     operator = Column(Enum(RelationOperator), nullable=True)
     controller_id = Column(Integer, ForeignKey('device_controllers.id'))
     action_type = Column(Enum(TriggerActionType))
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.now)
+    updated_at = Column(DateTime, default=datetime.now)
 
     plant = relationship("Plant", uselist=False, back_populates="triggers")
     factor = relationship("PlantFactor", uselist=False, back_populates="triggers")
     controller = relationship("DeviceController", uselist=False, back_populates="triggers")
 
-    @property
-    def is_triggered(self):
+    def is_triggered_by_value(self, value):
         operators = {
             '>': self._gt,
             '<': self._lt,
             '=': self._eq
         }
-        if self.operator and self.threshold and self.factor.latest_value:
-            return operators[self.operator](self.factor.latest_value.value)
+        if self.operator and self.threshold:
+            return operators[self.operator](value)
+        else:
+            return False
+
+    @property
+    def is_triggered(self):
+        if self.factor.latest_value:
+            return self.is_triggered_by_value(self.factor.latest_value.value)
         else:
             return False
 
@@ -142,7 +149,7 @@ class PlantSnapshot(Base):
     memo = Column(Text, nullable=True)
     event = Column(String(64))
     plant_status = Column(Enum(PlantStatus), default=PlantStatus.GERMINATION.value)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.now)
 
     plant = relationship("Plant", uselist=False, back_populates="snapshots")
 
@@ -151,7 +158,7 @@ class PlantSnapshot(Base):
 
     @property
     def image_path(self):
-        return "images/snapshots/{}.jpg".format(self.created_at.strftime("%Y%m%d%H%M"))
+        return "images/snapshots/{}.jpg".format(self.created_at.strftime("%Y%m%d%H%M%s"))
 
 
 Base.metadata.create_all(engine)

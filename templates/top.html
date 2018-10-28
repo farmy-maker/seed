@@ -4,35 +4,40 @@ Plant
 {% endblock %}
 {% block content %}
 <div class="container">
-  <div class="row ">
-    <h1 class="col">{{ plant.name }}</h1>
-  </div>
-  <hr>
+  <!--<div class="row ">-->
+    <!--<h1 class="col">{{ plant.name }}</h1>-->
+  <!--</div>-->
+  <!--<hr>-->
 
   <div class="row">
-    <div class="col-sm-4 col-md-4">
+    <div class="col-sm-5 col-md-5">
       <img class="img-fluid" src="{{ url_for('static', filename=plant.display_image_url) }}"/>
     </div>
-    <div class="col-sm-4 col-md-4">
-      <h3>植物情報</h3>
+    <!--<div class="col-sm-4 col-md-4">-->
+      <!--<h3>植物情報</h3>-->
+      <!--<hr>-->
+      <!--{% include 'parts/plant_info_parts.html' %}-->
+    <!--</div>-->
+    <div class="col-sm-7 col-md-7">
+      <h3>實時信息</h3>
       <hr>
-      {% include 'parts/plant_info_parts.html' %}
-    </div>
-    <div class="col-sm-4 col-md-4">
-      <h3>最新情報</h3>
-      <hr>
+      <div class="row">
       {% for factor in plant.factors %}
-        <h4>{{ factor.display_name }}</h4>
-        <p class="h1">{% if factor.latest_value %}{{ factor.latest_value.value }}<p class="small h3">({{ factor.latest_value.recorded_passed }})</p>{% else %}-{% endif %}</p>
+        <div class="col-4">
+          <h4>{{ factor.display_name }}</h4>
+          <p class="h1" id="current-{{ factor.factor_type }}">{% if factor.latest_value %}{{ factor.latest_value.value }}{% else %}-{% endif %}</p>
+        </div>
       {% endfor %}
+      </div>
     </div>
   </div>
+  <hr>
   <div class="row my-3">
-    <h2 class=>環境グラフ</h2>
+    <h2 class=>24小時曲線圖</h2>
   </div>
   <div class="row">
-  <div class="card-columns">
     {% for factor in plant.factors %}
+    <div class="col-4 mb-3">
       <div class="card bg-light">
         <div class="card-header">
           <h5>{{ factor.display_name }}</h5>
@@ -46,7 +51,7 @@ Plant
               <div class="modal-content">
                 <form class="form-horizontal" action="{{ url_for('create_trigger', factor_id=factor.id) }}" method="post">
                   <div class="modal-header">
-                    <h5 class="modal-title">Triggerを設定</h5>
+                    <h5 class="modal-title">設置Trigger</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                       <span aria-hidden="true">&times;</span>
                     </button>
@@ -55,8 +60,8 @@ Plant
                      {% include 'parts/plant_factor_trigger_fieldset.html' %}
                   </div>
                   <div class="modal-footer">
-                    <button class="btn btn-success" {% if not trigger_form.controller.choices %}disabled{% endif %}>追加</button>
-                    <button type="button" class="btn btn-default" data-dismiss="modal">キャンセル</button>
+                    <button class="btn btn-success" {% if not trigger_form.controller.choices %}disabled{% endif %}>添加</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
                   </div>
                 </form>
               </div>
@@ -64,8 +69,8 @@ Plant
           </div>
         </div>
       </div>
+    </div>
     {% endfor %}
-  </div>
   </div>
   <hr>
   {% if plant.triggers %}
@@ -80,7 +85,7 @@ Plant
         <td class="align-middle">{{ trigger.threshold }}</td>
         <td class="align-middle">THEN</td>
         <td class="align-middle">{{ trigger.action_type }}</td>
-        <td class="align-middle">{{ trigger.controller.control_type }}</td>
+        <td class="align-middle">{{ trigger.controller.controller_type }}</td>
         <td class="align-middle">{% if trigger.is_triggered %}<span class="text-danger"><i class="glyphicon glyphicon-ok-sign"></i> <strong>Triggerd!</strong></span>{% endif %}</td>
         <td class="align-middle">
         <form class="form-horizontal" action="{{ url_for('delete_trigger', trigger_id=trigger.id) }}" method="post">
@@ -90,26 +95,26 @@ Plant
         </td>
       </tr>
     {% else %}
-    <tr><td class="text-muted">Trigger はありません</td></tr>
+    <tr><td class="text-muted">暫時沒有 Trigger</td></tr>
     {% endfor %}
     </tbody>
   </table>
   {% endif %}
   <hr>
   <div class="row my-3">
-    <h2 class="pull-left">写真</h2>
+    <h2 class="pull-left">照片</h2>
   </div>
 
   <div class="row">
   {% for snapshot in plant.snapshots[:20] %}
     <div class="col-sm-3 col-md-3">
       <figure class="figure">
-        <img src="{{ url_for('static', filename=snapshot.image_path) }}" class="figure-img img-fluid img-thumbnail rounded" alt="{{ snapshot.created_at }}">
-        <figcaption class="figure-caption text-center">{{ snapshot.created_at }}</figcaption>
+        <img src="{{ url_for('static', filename=snapshot.image_path) }}" class="figure-img img-fluid img-thumbnail rounded" alt="{{ snapshot.created_at.strftime("%Y-%m-%d %H:%M:%S") }}">
+        <figcaption class="figure-caption text-center">{{ snapshot.created_at.strftime("%Y-%m-%d %H:%M:%S") }}</figcaption>
       </figure>
     </div>
   {% else %}
-    <p class="text-center text-muted">写真はありません</p>
+    <p class="text-center text-muted">暫時沒有照片</p>
   {% endfor %}
   </div>
 </div>

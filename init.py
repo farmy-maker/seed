@@ -1,21 +1,15 @@
-from models.base import Session
+# coding: utf-8
+from models.base import session
 from datetime import datetime, timedelta
 from models.enums import PlantGrowthFactor
 from models.device import Device, DeviceChannel, DeviceController, PlantControllerType, ChannelData
 from models.plant import Plant, PlantFactor, PlantSnapshot
 import random
 
-session = Session()
-
 
 def init_all(session):
     # TODO: init from json or csv file
-    plant = Plant(name="コマツナ",
-                  seed_temperature="15-30",
-                  light_exposure="日当たりが良い所",
-                  temperature="15-25",
-                  hard_level=2,
-                  )
+    plant = Plant(name=u"Plant")
     session.add(plant)
     device = Device(name="Raspberry Pi")
     session.add(device)
@@ -29,9 +23,9 @@ def init_all(session):
                                    channel_id=channel.id)
         session.add(plant_factor)
         session.commit()
-    pump_controller = DeviceController(device_id=device.id, control_type=PlantControllerType.PUMP)
+    pump_controller = DeviceController(device_id=device.id, controller_type=PlantControllerType.PUMP)
     session.add(pump_controller)
-    led_controller = DeviceController(device_id=device.id, control_type=PlantControllerType.LED)
+    led_controller = DeviceController(device_id=device.id, controller_type=PlantControllerType.LED)
     session.add(led_controller)
     session.commit()
 
@@ -53,6 +47,5 @@ def generate_fake_data(session):
 
 
 if __name__ == "__main__":
-    session = Session()
     init_all(session)
-    generate_fake_data(session)
+    # generate_fake_data(session)
