@@ -7,18 +7,22 @@ from init import init_all
 from forms import TriggerForm
 from flask_wtf.csrf import CSRFProtect
 from apscheduler.scheduler import Scheduler
-from config import FETCH_DATA_INTERVAL, FETCH_IMAGE_INTERVAL, TRIGGER_INTERVAL, MODE, DEBUG
+from config import FETCH_DATA_INTERVAL, FETCH_IMAGE_INTERVAL, TRIGGER_INTERVAL, MODE, DEBUG, USER, PASS
 from data import socketio, fetch_and_save_data, fetch_and_save_image, trigger_led, trigger_pump
 from device import device
 from auth import verify_key, get_qr_key
 import qrcode
 from io import BytesIO
+from flask_basicauth import BasicAuth
 
 
 app = Flask(__name__)
 socketio.init_app(app)
 app.config['SECRET_KEY'] = 'secret!'
 csrf = CSRFProtect(app)
+app.config['BASIC_AUTH_USERNAME'] = USER
+app.config['BASIC_AUTH_PASSWORD'] = PASS
+basic_auth = BasicAuth(app)
 
 
 @app.teardown_appcontext
@@ -103,6 +107,7 @@ def control():
 
 
 @app.route('/qrcode/')
+@basic_auth.required
 def qr():
     return render_template('qrcode.html')
 

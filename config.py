@@ -20,3 +20,6 @@ TRIGGER_INTERVAL = config.getint('sys', 'trigger_interval')
 
 CHART_INTERVAL = config.getint('sys', 'chart_interval')
 CHART_BEFORE = config.getint('sys', 'chart_before')
+
+USER = config.get('auth', 'user')
+PASS = config.get('auth', 'pass')
