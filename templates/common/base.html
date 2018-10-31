@@ -10,14 +10,14 @@
 
     <title>{% block sub_title %}{% endblock %} - Farmy</title>
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-    <script src="{{ url_for('static', filename='js/jquery-3.3.1.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/Chart.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/socket.io.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/ext/jquery-3.3.1.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/ext/Chart.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/ext/socket.io.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/ext/bootstrap.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/data.js') }}"></script>
     <script src="{{ url_for('static', filename='js/scan.js') }}"></script>
     <script src="{{ url_for('static', filename='js/control.js') }}"></script>
-    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/ext/bootstrap.min.css') }}" rel="stylesheet">
     {% block style %}
     {% endblock %}
     {% block script %}

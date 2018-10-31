@@ -1,5 +1,5 @@
 # utf-8
-from flask import Flask, render_template, redirect, request, send_file, url_for, g
+from flask import Flask, render_template, redirect, request, send_file
 from models.plant import Plant, PlantFactorTrigger, PlantFactor
 from models.device import DeviceController
 from models.base import session
@@ -10,11 +10,9 @@ from apscheduler.scheduler import Scheduler
 from config import FETCH_DATA_INTERVAL, FETCH_IMAGE_INTERVAL, TRIGGER_INTERVAL, MODE, DEBUG
 from data import socketio, fetch_and_save_data, fetch_and_save_image, trigger_led, trigger_pump
 from device import device
-import uuid
+from auth import verify_key, get_qr_key
 import qrcode
 from io import BytesIO
-from werkzeug.contrib.cache import SimpleCache
-cache = SimpleCache()
 
 
 app = Flask(__name__)
@@ -107,39 +105,6 @@ def control():
 @app.route('/qrcode/')
 def qr():
     return render_template('qrcode.html')
-
-
-def get_qr_key():
-    qr_key = cache.get('qr_key')
-    if not qr_key:
-        qr_key = uuid.uuid4().hex[-7:]
-        cache.set('qr_key', qr_key)
-        cache.set('old_qr_key', '')
-    return qr_key
-
-
-def update_key():
-    old_key = cache.get('qr_key')
-    new_key = uuid.uuid4().hex[-7:]
-    cache.set('qr_key', new_key)
-    cache.set('old_qr_key', old_key)
-    return new_key
-
-
-def verify_key(key):
-    return True
-    if not key:
-        return False
-    old_key = cache.get('old_qr_key')
-    new_key = cache.get('qr_key')
-    if key == old_key:
-        return True
-    elif key == new_key:
-        new_key = update_key()
-        socketio.emit('qr_code', new_key)
-        return True
-    else:
-        return False
 
 
 @app.route('/qrcode.jpg')
