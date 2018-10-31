@@ -1,0 +1,15 @@
+{% extends 'common/base.html' %}
+{% block sub_title %}
+Plant
+{% endblock %}
+{% block content %}
+<meta name="csrf-token" content="{{ csrf_token() }}">
+<div class="container">
+  <div class="row justify-content-md-center">
+  <h3 class="text-center">請掃描二維碼開始控制</h3>
+  </div>
+  <div class="row justify-content-md-center">
+  <img id='qr-img' src="{{ url_for('qr_jpg') }}">
+  </div>
+</div>
+{% endblock %}

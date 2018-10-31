@@ -3,8 +3,10 @@
 Plant
 {% endblock %}
 {% block content %}
-<meta name="csrf-token" content="{{ csrf_token() }}">
 <div class="container">
+  {% if not valid %}
+    <h4 class="text-center text-muted mb-3">控制權已經過期</h4>
+  {% endif %}
   <div class="row">
     <div class="col">
       <div class="card bg-light">
@@ -12,8 +14,8 @@ Plant
         <h3 class="text-center mb-3">LED</h3>
         </div>
         <div class="card-body">
-            <button data-type="led" data-action-type="turn_on" type="button" class="control-btn btn btn-success btn-lg btn-block">TURN ON</button>
-            <button data-type="led" data-action-type="turn_off" type="button" class="control-btn btn btn-dark btn-lg btn-block">TURN OFF</button>
+            <button data-type="led" {% if not valid %} disabled {% endif %} data-action-type="turn_on" data-token="{{ key }}" type="button" class="control-btn btn btn-success btn-lg btn-block">TURN ON</button>
+            <button data-type="led" {% if not valid %} disabled {% endif %} data-action-type="turn_off" data-token="{{ key }}" type="button" class="control-btn btn btn-dark btn-lg btn-block">TURN OFF</button>
         </div>
       </div>
     </div>
@@ -23,8 +25,8 @@ Plant
         <h3 class="text-center mb-3">PUMP</h3>
         </div>
         <div class="card-body">
-            <button data-type="pump" data-action-type="turn_on" type="button" class="control-btn btn btn-success btn-lg btn-block">TURN ON</button>
-            <button data-type="pump" data-action-type="turn_off" type="button" class="control-btn btn btn-dark btn-lg btn-block">TURN OFF</button>
+            <button data-type="pump" {% if not valid %} disabled {% endif %} data-action-type="turn_on" data-token="{{ key }}" type="button" class="control-btn btn btn-success btn-lg btn-block">TURN ON</button>
+            <button data-type="pump" {% if not valid %} disabled {% endif %} data-action-type="turn_off" data-token="{{ key }}" type="button" class="control-btn btn btn-dark btn-lg btn-block">TURN OFF</button>
         </div>
       </div>
     </div>

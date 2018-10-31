@@ -1,5 +1,5 @@
 # utf-8
-from flask import Flask, render_template, redirect, request, send_file, url_for
+from flask import Flask, render_template, redirect, request, send_file, url_for, g
 from models.plant import Plant, PlantFactorTrigger, PlantFactor
 from models.device import DeviceController
 from models.base import session
@@ -7,11 +7,14 @@ from init import init_all
 from forms import TriggerForm
 from flask_wtf.csrf import CSRFProtect
 from apscheduler.scheduler import Scheduler
-from config import FETCH_DATA_INTERVAL, FETCH_IMAGE_INTERVAL, TRIGGER_INTERVAL, MODE
+from config import FETCH_DATA_INTERVAL, FETCH_IMAGE_INTERVAL, TRIGGER_INTERVAL, MODE, DEBUG
 from data import socketio, fetch_and_save_data, fetch_and_save_image, trigger_led, trigger_pump
 from device import device
+import uuid
 import qrcode
 from io import BytesIO
+from werkzeug.contrib.cache import SimpleCache
+cache = SimpleCache()
 
 
 app = Flask(__name__)
@@ -83,25 +86,71 @@ def delete_trigger(trigger_id):
 @csrf.exempt
 @app.route('/control/', methods=['POST', 'GET'])
 def control():
+    key = request.args.get('key')
+    key_valid = verify_key(key)
     if request.method == 'POST':
-        controller_type = request.json['controller_type']
-        action_type = request.json['action_type']
-        if controller_type == 'led':
-            getattr(device.led_controller, action_type)()
-        elif controller_type == 'pump':
-            getattr(device.pump_controller, action_type)()
-        return "OK"
+        token = request.json['token']
+        if verify_key(token):
+            controller_type = request.json['controller_type']
+            action_type = request.json['action_type']
+            if controller_type == 'led':
+                getattr(device.led_controller, action_type)()
+            elif controller_type == 'pump':
+                getattr(device.pump_controller, action_type)()
+            return "OK", 200
+        else:
+            return "403 Forbidden", 403
     else:
-        return render_template('control.html')
+        return render_template('control.html', key=key, valid=key_valid)
 
 
 @app.route('/qrcode/')
 def qr():
+    return render_template('qrcode.html')
+
+
+def get_qr_key():
+    qr_key = cache.get('qr_key')
+    if not qr_key:
+        qr_key = uuid.uuid4().hex[-7:]
+        cache.set('qr_key', qr_key)
+        cache.set('old_qr_key', '')
+    return qr_key
+
+
+def update_key():
+    old_key = cache.get('qr_key')
+    new_key = uuid.uuid4().hex[-7:]
+    cache.set('qr_key', new_key)
+    cache.set('old_qr_key', old_key)
+    return new_key
+
+
+def verify_key(key):
+    return True
+    if not key:
+        return False
+    old_key = cache.get('old_qr_key')
+    new_key = cache.get('qr_key')
+    if key == old_key:
+        return True
+    elif key == new_key:
+        new_key = update_key()
+        socketio.emit('qr_code', new_key)
+        return True
+    else:
+        return False
+
+
+@app.route('/qrcode.jpg')
+def qr_jpg():
+    key = get_qr_key()
     f = BytesIO()
-    img = qrcode.make(request.url_root + 'control/')
-    img.save(f, format='png')
+    img = qrcode.make(request.url_root + 'control/?key=' + key)
+    img = img.convert('RGB').resize((240, 240))
+    img.save(f, format='jpeg')
     f.seek(0)
-    return send_file(f, mimetype='image/png')
+    return send_file(f, mimetype='image/jpeg')
 
 
 if __name__ == '__main__':
@@ -117,4 +166,4 @@ if __name__ == '__main__':
     if MODE != 'demo':
         sched.add_cron_job(trigger_led, minute="*/{}".format(TRIGGER_INTERVAL), args=[plant])
         sched.add_cron_job(trigger_pump, minute="*/{}".format(TRIGGER_INTERVAL), args=[plant])
-    socketio.run(app, host='0.0.0.0', debug=True)
+    socketio.run(app, host='0.0.0.0', debug=DEBUG)
