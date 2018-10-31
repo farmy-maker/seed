@@ -32,47 +32,6 @@ Plant
     </div>
   </div>
   <hr>
-  <div class="row my-3">
-    <h2 class=>24小時曲線圖</h2>
-  </div>
-  <div class="row">
-    {% for factor in plant.factors %}
-    <div class="col-4 mb-3">
-      <div class="card bg-light">
-        <div class="card-header">
-          <h5>{{ factor.display_name }}</h5>
-        </div>
-        <div class="card-body">
-          {% include 'parts/channel_chart_part.html' %}
-          <a href="#" class="btn btn-success btn-sm" role="button">詳細</a>
-          <button type="button" class="btn btn-dark btn-sm float-right" data-toggle="modal" data-target="#edit_plant_factor_trigger_modal_{{ factor.id }}"><b>+</b> Trigger</button>
-          <div class="modal fade" id="edit_plant_factor_trigger_modal_{{ factor.id }}" tabindex="-1" role="dialog">
-            <div class="modal-dialog modal-lg">
-              <div class="modal-content">
-                <form class="form-horizontal" action="{{ url_for('create_trigger', factor_id=factor.id) }}" method="post">
-                  <div class="modal-header">
-                    <h5 class="modal-title">設置Trigger</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                      <span aria-hidden="true">&times;</span>
-                    </button>
-                  </div>
-                  <div class="modal-body">
-                     {% include 'parts/plant_factor_trigger_fieldset.html' %}
-                  </div>
-                  <div class="modal-footer">
-                    <button class="btn btn-success" {% if not trigger_form.controller.choices %}disabled{% endif %}>添加</button>
-                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    {% endfor %}
-  </div>
-  <hr>
   {% if plant.triggers %}
   <h4>Trigger 一覧</h4>
   <table class="table table-striped table-hover text-center">
@@ -102,11 +61,53 @@ Plant
   {% endif %}
   <hr>
   <div class="row my-3">
+    <h2 class=>24小時曲線圖</h2>
+  </div>
+  <div class="row">
+    {% for factor in plant.factors %}
+    <div class="col-4 mb-3">
+      <div class="card bg-light">
+        <div class="card-header">
+          <h5>{{ factor.display_name }}</h5>
+        </div>
+        <div class="card-body">
+          {% include 'parts/channel_chart_part.html' %}
+          <a hidden href="#" class="btn btn-success btn-sm" role="button">詳細</a>
+          <button type="button" class="btn btn-dark btn-sm float-right" data-toggle="modal" data-target="#edit_plant_factor_trigger_modal_{{ factor.id }}"><b>+</b> Trigger</button>
+          <div class="modal fade" id="edit_plant_factor_trigger_modal_{{ factor.id }}" tabindex="-1" role="dialog">
+            <div class="modal-dialog modal-lg">
+              <div class="modal-content">
+                <form class="form-horizontal" action="{{ url_for('create_trigger', factor_id=factor.id) }}" method="post">
+                  <div class="modal-header">
+                    <h5 class="modal-title">設置Trigger</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                  <div class="modal-body">
+                     {% include 'parts/plant_factor_trigger_fieldset.html' %}
+                  </div>
+                  <div class="modal-footer">
+                    <button class="btn btn-success" {% if not trigger_form.controller.choices %}disabled{% endif %}>添加</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  <hr>
+
+  <div class="row my-3">
     <h2 class="pull-left">照片</h2>
   </div>
 
   <div class="row">
-  {% for snapshot in plant.snapshots[:20] %}
+  {% for snapshot in plant.snapshots[:12] %}
     <div class="col-sm-3 col-md-3">
       <figure class="figure">
         <img src="{{ url_for('static', filename=snapshot.image_path) }}" class="figure-img img-fluid img-thumbnail rounded" alt="{{ snapshot.created_at.strftime("%Y-%m-%d %H:%M:%S") }}">
