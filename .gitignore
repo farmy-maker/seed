@@ -133,6 +133,6 @@ Temporary Items
 
 # Images
 static/images/snapshots/*.jpg
-static/css
-static/js
+static/css/ext
+static/js/ext
 data.db
